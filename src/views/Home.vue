@@ -11,6 +11,12 @@
           <h2 class="subtitle">
             Get a random game from your Steam library to play
           </h2>
+          <h3 class="heading">
+            Made with 💙 and ☕ by
+            <a href="https://twitter.com/0NEGUYY" style="color: ghostwhite"
+              >@0NEGUYY</a
+            >
+          </h3>
         </div>
       </div>
     </section>
@@ -67,17 +73,25 @@
           </div>
           <div v-if="steamData" class="column is-12 content-card">
             <div class="columns is-multiline">
-              <div class="column is-12">
+              <div class="column is-12 has-text-centered">
                 <button
                   @click="pickRandomGame"
                   class="button is-primary is-large"
                 >
                   Pick Random Game
                 </button>
+                <br /><br />
               </div>
-              <div v-if="randomChosen" class="column is-12">
-                <h1 class="title">You're going to play:</h1>
+              <div v-if="randomChosen" class="column is-12 has-text-centered">
+                <h2 class="subtitle">You're going to play:</h2>
+                <br />
+                <img
+                  :src="randomChosen.logo[0]"
+                  alt=""
+                  width="300px"
+                /><br /><br />
                 <h1 class="title">{{ randomChosen.name[0] }}</h1>
+                <br /><br />
               </div>
             </div>
           </div>
