@@ -17,7 +17,7 @@
     <section id="home">
       <div class="container">
         <div class="columns is-multiline">
-          <div class="column is-12 content-card">
+          <div class="column is-12 content-card has-text-centered">
             <div id="game-picker has-text-centered">
               <h1 class="title has-text-centered">
                 Enter your SteamID64 below to get your games list.
@@ -35,9 +35,34 @@
                 </a>
               </h2>
               <b-field label="SteamID64">
-                <b-input v-model="steam64" type="number"></b-input>
+                <b-input v-model="steam64"></b-input>
               </b-field>
-              <b-button @click="fetchGames">Load my Games</b-button>
+              <b-button @click="fetchGames" type="is-primary"
+                >Load Games by ID</b-button
+              >
+              <hr />
+              <div class="buttons is-centered">
+                <b-button
+                  @click="fetchGames('76561198065418715')"
+                  type="is-small is-light"
+                  >Load 0NEGUY's Games</b-button
+                >
+                <b-button
+                  @click="fetchGames('76561198111514784')"
+                  type="is-small is-light"
+                  >Load Enszourous' Games</b-button
+                >
+                <b-button
+                  @click="fetchGames('76561198049210825')"
+                  type="is-small is-light"
+                  >Load JesseGR's Games</b-button
+                >
+                <b-button
+                  @click="fetchGames('76561198065418715')"
+                  type="is-small is-light"
+                  >Load Goat's Games</b-button
+                >
+              </div>
             </div>
           </div>
           <div v-if="steamData" class="column is-12 content-card">
@@ -86,15 +111,16 @@ export default {
   name: "Home",
   components: {},
   data: () => ({
-    steam64: "76561198065418715",
+    steam64: undefined,
     steamData: undefined,
     randomChosen: undefined,
     loading: false,
   }),
   methods: {
-    fetchGames() {
+    fetchGames(profile) {
       this.loading = true;
-      const id = this.steam64;
+      let id = this.steam64;
+      if (profile) id = profile;
       // didn't want to deal with cors in localhost development
       const URL = `https://cors-anywhere.herokuapp.com/steamcommunity.com/profiles/${id}/games?tab=all&xml=1`;
       const xml2js = require("xml2js");
