@@ -31,18 +31,24 @@
               <h2 class="subtitle has-text-centered">
                 Make sure your games list is public on Steam.
                 <br />
-
+                <br /><br />
+                <p class="help">
+                  Paste your profile URL in the tool below to get your
+                  <code>steamID64 (Dec)</code> value
+                </p>
                 <a
                   href="https://steamidfinder.com/"
                   class="button is-text"
                   target="_blank"
                 >
-                  Get your Steam64 ID Here
+                  Get your Steam64 (Dec) ID Here
                 </a>
+                <br /><br />
               </h2>
-              <b-field label="SteamID64">
+              <b-field label="Your SteamID64">
                 <b-input v-model="steam64"></b-input>
               </b-field>
+              <br />
               <b-button @click="fetchGames" type="is-primary"
                 >Load Games by ID</b-button
               >
