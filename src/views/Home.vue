@@ -21,7 +21,7 @@
                 Enter your SteamID64 below to get your games list
               </h2>
               <b-field label="SteamID64">
-                <b-input v-model="steam64"></b-input>
+                <b-input v-model="steam64" type="number"></b-input>
               </b-field>
               <b-button @click="fetchGames">Load my Games</b-button>
             </div>
@@ -90,6 +90,7 @@ export default {
             alert(err);
           } else {
             this.steamData = result.gamesList.games[0].game;
+            console.log(this.steamData);
           }
         });
       });
