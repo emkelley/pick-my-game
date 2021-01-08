@@ -1,5 +1,7 @@
 <template>
   <div class="home">
+    <b-loading :is-full-page="true" v-model="loading"></b-loading>
+
     <section class="hero is-primary">
       <div class="hero-body">
         <div class="container">
@@ -16,9 +18,21 @@
       <div class="container">
         <div class="columns is-multiline">
           <div class="column is-12 content-card">
-            <div id="game-picker">
-              <h2 class="subtitle">
-                Enter your SteamID64 below to get your games list
+            <div id="game-picker has-text-centered">
+              <h1 class="title has-text-centered">
+                Enter your SteamID64 below to get your games list.
+              </h1>
+              <h2 class="subtitle has-text-centered">
+                Make sure your games list is public on Steam.
+                <br />
+
+                <a
+                  href="https://steamidfinder.com/"
+                  class="button is-text"
+                  target="_blank"
+                >
+                  Get your Steam64 ID Here
+                </a>
               </h2>
               <b-field label="SteamID64">
                 <b-input v-model="steam64" type="number"></b-input>
@@ -46,7 +60,7 @@
             <div class="columns is-multiline">
               <div
                 v-for="game in steamData"
-                :key="game.appID"
+                :key="game.appID[0]"
                 class="column is-3"
               >
                 <div class="game-card">
@@ -59,7 +73,6 @@
                 </div>
               </div>
             </div>
-            {{ steamData[0] }}
           </div>
         </div>
       </div>
@@ -76,29 +89,43 @@ export default {
     steam64: "76561198065418715",
     steamData: undefined,
     randomChosen: undefined,
+    loading: false,
   }),
   methods: {
     fetchGames() {
+      this.loading = true;
       const id = this.steam64;
+      // didn't want to deal with cors in localhost development
       const URL = `https://cors-anywhere.herokuapp.com/steamcommunity.com/profiles/${id}/games?tab=all&xml=1`;
-      const parseString = require("xml2js").parseString;
-      console.log(URL);
-
+      const xml2js = require("xml2js");
+      var parser = new xml2js.Parser();
       axios.get(URL).then((response) => {
-        parseString(response.data, (err, result) => {
-          if (err) {
-            alert(err);
-          } else {
+        parser
+          .parseStringPromise(response.data)
+          .then((result) => {
+            this.loading = false;
             this.steamData = result.gamesList.games[0].game;
-            console.log(this.steamData);
-          }
-        });
+          })
+          .catch(() =>
+            this.displayError("Invalid SteamID or game list is set to private.")
+          );
       });
     },
     pickRandomGame() {
       this.randomChosen = this.steamData[
         Math.floor(Math.random() * this.steamData.length)
       ];
+    },
+    displayError(message) {
+      this.loading = false;
+      this.$buefy.dialog.alert({
+        title: "Error fetching games list",
+        message: message,
+        type: "is-danger",
+        hasIcon: false,
+        ariaRole: "alertdialog",
+        ariaModal: true,
+      });
     },
   },
 };
