@@ -1,7 +1,5 @@
 <template>
   <div class="home">
-    <b-loading :is-full-page="true" v-model="loading"></b-loading>
-
     <section class="hero is-primary">
       <div class="hero-body">
         <div class="container">
@@ -21,83 +19,95 @@
       </div>
     </section>
     <section id="home">
-      <div class="container">
+      <div class="container is-fluid">
         <div class="columns is-multiline">
-          <div class="column is-12 content-card has-text-centered">
+          <div class="column is-6 is-offset-3 content-card has-text-centered">
             <div id="game-picker has-text-centered">
               <h1 class="title has-text-centered">
-                Enter your SteamID64 below to get your games list.
+                First, enter your SteamID64 to load your games
               </h1>
               <h2 class="subtitle has-text-centered">
-                Make sure your games list is public on Steam.
                 <br />
                 <br /><br />
                 <p class="help">
                   Paste your profile URL in the tool below to get your
                   <code>steamID64 (Dec)</code> value
                 </p>
+                <p class="help">
+                  NOTE: Make sure your games list is public on Steam.
+                </p>
+                <br />
                 <a
                   href="https://steamidfinder.com/"
-                  class="button is-text"
+                  class="button is-grey is-small"
                   target="_blank"
                 >
                   Get your Steam64 (Dec) ID Here
                 </a>
                 <br /><br />
               </h2>
-              <b-field label="Your SteamID64">
-                <b-input v-model="steam64"></b-input>
-              </b-field>
+              <div class="control ">
+                <input
+                  v-model="steam64"
+                  class="input is-medium"
+                  type="text"
+                  placeholder="76561198065418715"
+                />
+              </div>
               <br />
-              <b-button @click="fetchGames(steam64)" type="is-primary"
-                >Load Games by ID</b-button
-              >
+              <button class="button is-primary" @click="fetchGames(steam64)">
+                Load Games by ID
+              </button>
               <hr />
               <div class="buttons is-centered">
-                <b-button
+                <button
+                  class="button is-light is-small"
                   @click="fetchGames('76561198065418715')"
-                  type="is-small is-light"
-                  >Load 0NEGUY's Games</b-button
                 >
-                <b-button
+                  Load 0NEGUY's Games
+                </button>
+                <button
+                  class="button is-light is-small"
                   @click="fetchGames('76561198111514784')"
-                  type="is-small is-light"
-                  >Load Enszourous' Games</b-button
                 >
-                <b-button
+                  Load Enszourous' Games
+                </button>
+                <button
+                  class="button is-light is-small"
                   @click="fetchGames('76561198049210825')"
-                  type="is-small is-light"
-                  >Load JesseGR's Games</b-button
                 >
-                <b-button
+                  Load JesseGR's Games
+                </button>
+                <button
+                  class="button is-light is-small"
                   @click="fetchGames('76561198065418715')"
-                  type="is-small is-light"
-                  >Load Goat's Games</b-button
                 >
+                  Load Goat's Games
+                </button>
               </div>
             </div>
           </div>
-          <div v-if="steamData" class="column is-12 content-card">
+          <div v-if="steamData" class="column is-4 is-offset-4 content-card">
             <div class="columns is-multiline">
               <div class="column is-12 has-text-centered">
-                <button
-                  @click="pickRandomGame"
-                  class="button is-primary is-large"
-                >
-                  Pick Random Game
+                <button @click="pickRandomGame" class="button is-info">
+                  Pick a Random Game
                 </button>
                 <br /><br />
               </div>
-              <div v-if="randomChosen" class="column is-12 has-text-centered">
-                <h2 class="subtitle">You're going to play:</h2>
-                <br />
-                <img
-                  :src="randomChosen.logo[0]"
-                  alt=""
-                  width="300px"
-                /><br /><br />
-                <h1 class="title">{{ randomChosen.name[0] }}</h1>
-                <br /><br />
+              <div v-if="randomChosen" class="column  has-text-centered">
+                <div class="game-card">
+                  <div class="game-card--head">
+                    <img
+                      :src="getGameBanner(randomChosen.appID[0])"
+                      @error="handleBadBanner"
+                      alt=""
+                    />
+                  </div>
+                  <div class="game-card--body">
+                    <h2 class="subtitle">{{ randomChosen.name[0] }}</h2>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -110,7 +120,11 @@
               >
                 <div class="game-card">
                   <div class="game-card--head">
-                    <img :src="game.logo[0]" alt="" width="100%" />
+                    <img
+                      :src="getGameBanner(game.appID[0])"
+                      @error="handleBadBanner"
+                      alt=""
+                    />
                   </div>
                   <div class="game-card--body">
                     <h2 class="subtitle">{{ game.name[0] }}</h2>
@@ -126,20 +140,18 @@
 </template>
 
 <script>
+import { ref } from "vue";
 import axios from "axios";
 export default {
   name: "Home",
-  components: {},
-  data: () => ({
-    steam64: undefined,
-    steamData: undefined,
-    randomChosen: undefined,
-    loading: false,
-  }),
-  methods: {
-    fetchGames(profile) {
-      this.loading = true;
-      // didn't want to deal with cors in localhost development
+  setup() {
+    const loading = ref(false);
+    const steam64 = ref(undefined);
+
+    const steamData = ref(undefined);
+    const fetchGames = (profile) => {
+      loading.value = true;
+      // ! didn't want to deal with cors in localhost development
       const URL = `https://cors-anywhere.herokuapp.com/steamcommunity.com/profiles/${profile}/games?tab=all&xml=1`;
       const xml2js = require("xml2js");
       var parser = new xml2js.Parser();
@@ -147,30 +159,41 @@ export default {
         parser
           .parseStringPromise(response.data)
           .then((result) => {
-            this.loading = false;
-            this.steamData = result.gamesList.games[0].game;
+            loading.value = false;
+            steamData.value = result.gamesList.games[0].game;
           })
           .catch(() =>
             this.displayError("Invalid SteamID or game list is set to private.")
           );
       });
-    },
-    pickRandomGame() {
-      this.randomChosen = this.steamData[
-        Math.floor(Math.random() * this.steamData.length)
-      ];
-    },
-    displayError(message) {
-      this.loading = false;
-      this.$buefy.dialog.alert({
-        title: "Error fetching games list",
-        message: message,
-        type: "is-danger",
-        hasIcon: false,
-        ariaRole: "alertdialog",
-        ariaModal: true,
-      });
-    },
+    };
+
+    const getGameBanner = (appID) => {
+      let url = `https://cdn.akamai.steamstatic.com/steam/apps/${appID}/header.jpg`;
+      return url;
+    };
+
+    const randomChosen = ref(undefined);
+
+    const pickRandomGame = () => {
+      randomChosen.value =
+        steamData.value[Math.floor(Math.random() * steamData.value.length)];
+    };
+
+    const handleBadBanner = (event) => {
+      event.target.src = "https://cdn.oneguy.io/default-banner.jpg";
+    };
+
+    return {
+      loading,
+      steam64,
+      steamData,
+      fetchGames,
+      randomChosen,
+      getGameBanner,
+      pickRandomGame,
+      handleBadBanner,
+    };
   },
 };
 </script>
@@ -194,10 +217,35 @@ export default {
   border-radius: 5px;
   background: ghostwhite;
   overflow: hidden;
+  .game-card-head {
+    background: url("../assets/default-banner.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    min-height: 175px;
+    img {
+      width: 100%;
+    }
+  }
   .game-card--body {
     background: ghostwhite;
     text-align: center;
     padding: 1rem;
+  }
+}
+.card {
+  box-shadow: none;
+  border: 1px solid #e1e1e1;
+  border-radius: 10px;
+  .card-body {
+    padding: 3rem 1rem;
+    .title {
+      font-weight: 400;
+    }
+    .subtitle {
+      font-size: 1rem;
+      margin-bottom: 1.75rem;
+    }
   }
 }
 </style>
