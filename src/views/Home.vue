@@ -49,7 +49,7 @@
                 <b-input v-model="steam64"></b-input>
               </b-field>
               <br />
-              <b-button @click="fetchGames" type="is-primary"
+              <b-button @click="fetchGames(steam64)" type="is-primary"
                 >Load Games by ID</b-button
               >
               <hr />
@@ -139,10 +139,8 @@ export default {
   methods: {
     fetchGames(profile) {
       this.loading = true;
-      let id = this.steam64;
-      if (profile) id = profile;
       // didn't want to deal with cors in localhost development
-      const URL = `https://cors-anywhere.herokuapp.com/steamcommunity.com/profiles/${id}/games?tab=all&xml=1`;
+      const URL = `https://cors-anywhere.herokuapp.com/steamcommunity.com/profiles/${profile}/games?tab=all&xml=1`;
       const xml2js = require("xml2js");
       var parser = new xml2js.Parser();
       axios.get(URL).then((response) => {
